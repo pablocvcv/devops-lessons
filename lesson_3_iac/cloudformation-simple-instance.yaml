@@ -1,0 +1,19 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Resources:
+  MyInstance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId: "ami-08f9a9c699d2ab3f9" # AMI de Amazon Linux 2 (puede variar)
+      InstanceType: "t2.micro"
+      KeyName: "test" # Que clave SSH queremos asignar a la maquina
+      SecurityGroups:
+        - Ref: MySecurityGroup
+  MySecurityGroup:
+    Type: "AWS::EC2::SecurityGroup" 
+    Properties:
+      GroupDescription: "Permitir SSH"
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: 22
+          ToPort: 22
+          CidrIp: "0.0.0.0/0"

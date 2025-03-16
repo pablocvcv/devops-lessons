@@ -1,19 +1,44 @@
-AWSTemplateFormatVersion: "2010-09-09"
+# http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/sample-templates-services-us-west-2.html#w1ab2c21c45c15c15
+# Amazon EC2 instance in a security group Creates an Amazon EC2 instance in an Amazon EC2 security group.
+---
+AWSTemplateFormatVersion: '2010-09-09'
 Resources:
-  MyInstance:
-    Type: "AWS::EC2::Instance"
+  MyVPC:
+    Type: "AWS::EC2::VPC"
     Properties:
-      ImageId: "ami-08f9a9c699d2ab3f9" # AMI de Amazon Linux 2 (puede variar)
-      InstanceType: "t2.micro"
-      KeyName: "test" # Que clave SSH queremos asignar a la maquina
-      SecurityGroups:
-        - Ref: MySecurityGroup
-  MySecurityGroup:
-    Type: "AWS::EC2::SecurityGroup" 
+      CidrBlock: "10.0.0.0/16"
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+
+  MySubnet:
+    Type: "AWS::EC2::Subnet"
     Properties:
-      GroupDescription: "Permitir SSH"
+      VpcId: !Ref MyVPC
+      CidrBlock: "10.0.1.0/24"
+      MapPublicIpOnLaunch: true
+
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH access via port 22
       SecurityGroupIngress:
-        - IpProtocol: "tcp"
-          FromPort: 22
-          ToPort: 22
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
           CidrIp: "0.0.0.0/0"
+      VpcId: !Ref MyVPC
+
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: "t2.micro"
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: 'true'
+          DeviceIndex: '0'
+          GroupSet:
+          - Ref: InstanceSecurityGroup
+          SubnetId:
+            Ref: MySubnet
+
+      KeyName: "test" # Que clave SSH queremos asignar a la maquina
+      ImageId: "ami-08f9a9c699d2ab3f9"
